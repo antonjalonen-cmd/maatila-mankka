@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maatila Mankka – Perunaa Eurajoelta</title>
+  <meta name="description" content="Maatila Mankka tuottaa laadukkaita perunalajikkeita Eurajoelta. Annabelle, Helmi ja Vindika – paikallista perunaa lähikauppoihisi.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ── TOKENS ──────────────────────────────────────── */
+    :root {
+      --soil:   #2e1f0e;
+      --gold:   #c8a020;
+      --gold-lt:#f0d870;
+      --cream:  #faf5e8;
+      --cream2: #f2ead4;
+      --green:  #485e30;
+      --muted:  #7a6a54;
+      --border: rgba(46,31,14,.12);
+      --r:      26px;
+      --pill:   50px;
+      --serif:  'Libre Baskerville', Georgia, serif;
+      --sans:   'Outfit', system-ui, sans-serif;
+    }
+
+    /* ── RESET ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--cream); color: var(--soil); overflow-x: hidden; }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── I18N ────────────────────────────────────────── */
+    .lang-sv, .lang-en { display: none; }
+    body.lang-sv .lang-fi { display: none; }
+    body.lang-sv .lang-sv { display: revert; }
+    body.lang-en .lang-fi { display: none; }
+    body.lang-en .lang-en { display: revert; }
+
+    /* ── REVEAL ──────────────────────────────────────── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .65s ease, transform .65s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+
+    /* ── NAV — transparent → frosted on scroll ───────── */
+    .nav-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .9rem 2.5rem;
+      transition: background .35s, box-shadow .35s, padding .35s;
+    }
+    .nav-bar.scrolled {
+      background: rgba(250,245,232,.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 1px 0 var(--border);
+      padding: .65rem 2.5rem;
+    }
+    .nav-logo { display: flex; align-items: center; gap: .65rem; }
+    .nav-logo img { height: 38px; width: 38px; object-fit: cover; border-radius: var(--pill); border: 2px solid rgba(200,160,32,.3); }
+    .nav-wordmark { font-family: var(--serif); font-size: .92rem; color: var(--cream); line-height: 1.2; transition: color .35s; }
+    .nav-bar.scrolled .nav-wordmark { color: var(--soil); }
+    .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+    .nav-links a { font-size: .82rem; font-weight: 500; letter-spacing: .04em; color: rgba(255,255,255,.85); transition: color .35s; }
+    .nav-bar.scrolled .nav-links a { color: var(--muted); }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-bar.scrolled .nav-links a:hover { color: var(--green); }
+    .nav-lang { display: flex; gap: .4rem; }
+    .lang-btn { background: rgba(255,255,255,.12); border: none; border-radius: var(--pill); padding: .28rem .62rem; font-family: var(--sans); font-size: .7rem; font-weight: 600; letter-spacing: .07em; cursor: pointer; color: rgba(255,255,255,.6); transition: all .25s; }
+    .lang-btn.active, .lang-btn:hover { background: var(--gold); color: var(--soil); }
+    .nav-bar.scrolled .lang-btn { background: rgba(46,31,14,.08); color: var(--muted); }
+    .nav-bar.scrolled .lang-btn.active, .nav-bar.scrolled .lang-btn:hover { background: var(--green); color: #fff; }
+    .nav-hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: .5rem; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: rgba(255,255,255,.8); border-radius: 2px; transition: background .35s; }
+    .nav-bar.scrolled .nav-hamburger span { background: var(--soil); }
+
+    @media (max-width: 820px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .mob-menu { display: flex; }
+    }
+
+    /* Mobile menu overlay */
+    .mob-menu {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: var(--soil); flex-direction: column;
+      align-items: center; justify-content: center; gap: 2rem;
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .mob-menu.open { opacity: 1; pointer-events: all; }
+    .mob-close { position: absolute; top: 1.5rem; right: 2rem; background: none; border: none; cursor: pointer; font-size: 1.6rem; color: rgba(255,255,255,.5); }
+    .mob-links { list-style: none; text-align: center; }
+    .mob-links li { margin: .6rem 0; }
+    .mob-links a { font-family: var(--serif); font-size: 2rem; color: rgba(255,255,255,.85); transition: color .2s; }
+    .mob-links a:hover { color: var(--gold); }
+    .mob-lang { display: flex; gap: .6rem; margin-top: 1rem; }
+
+    /* ── HERO — asymmetric offset ────────────────────── */
+    .hero {
+      min-height: 100dvh; position: relative; overflow: hidden;
+      background: var(--soil);
+      display: grid; grid-template-columns: 1fr 1fr; align-items: center;
+    }
+    .hero-left {
+      padding: 10rem 3rem 5rem 5rem; position: relative; z-index: 2;
+    }
+    .hero-eyebrow { font-size: .68rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.5rem; }
+    .hero-heading {
+      font-family: var(--serif); font-size: clamp(3.5rem, 6vw, 7rem);
+      line-height: .95; color: var(--cream); letter-spacing: -.02em; margin-bottom: 1.75rem;
+    }
+    .hero-heading em { display: block; font-style: italic; color: var(--gold-lt); }
+    .hero-sub { font-size: clamp(.95rem, 1.3vw, 1.08rem); line-height: 1.75; color: rgba(250,245,232,.65); max-width: 38ch; margin-bottom: 2.5rem; font-weight: 300; }
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: var(--gold); color: var(--soil); font-weight: 600;
+      font-size: .85rem; letter-spacing: .04em;
+      padding: .9rem 2rem; border-radius: var(--pill);
+      transition: background .2s, transform .2s;
+    }
+    .hero-cta:hover { background: var(--gold-lt); transform: translateY(-2px); }
+    .hero-location { margin-top: 1.75rem; font-size: .8rem; color: rgba(250,245,232,.4); letter-spacing: .06em; }
+    .hero-right {
+      position: relative; height: 100%; overflow: hidden;
+    }
+    .hero-right .ph {
+      position: absolute; inset: 0;
+      background: linear-gradient(160deg, #4a3820 0%, #2e1f0e 50%, #1a1008 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+    }
+    .hero-right .ph svg { width: 60px; height: 60px; opacity: .2; }
+    .hero-right .ph-tag { font-size: .68rem; letter-spacing: .12em; color: rgba(250,245,232,.25); text-transform: uppercase; }
+    .hero-right img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    /* Decorative: overlapping circle accent */
+    .hero-circle {
+      position: absolute; width: 420px; height: 420px; border-radius: 50%;
+      border: 1px solid rgba(200,160,32,.15); top: 50%; left: -60px;
+      transform: translateY(-50%); pointer-events: none; z-index: 1;
+    }
+    .hero-circle2 {
+      position: absolute; width: 280px; height: 280px; border-radius: 50%;
+      border: 1px solid rgba(200,160,32,.1); top: 50%; left: 60px;
+      transform: translateY(-50%); pointer-events: none; z-index: 1;
+    }
+
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-right { height: 45vh; order: -1; }
+      .hero-left { padding: 6rem 1.5rem 4rem; }
+      .hero-circle, .hero-circle2 { display: none; }
+    }
+
+    /* ── SECTION COMMONS ─────────────────────────────── */
+    .sec-label { display: inline-block; font-size: .67rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--green); margin-bottom: .9rem; }
+    .sec-heading { font-family: var(--serif); font-size: clamp(1.9rem, 3vw, 2.9rem); line-height: 1.1; letter-spacing: -.015em; margin-bottom: 1rem; }
+    .sec-body { font-size: .97rem; line-height: 1.78; color: var(--muted); font-weight: 300; }
+    .sec-body p + p { margin-top: .85rem; }
+
+    /* ── VARIETIES — SIGNATURE COMPONENT ────────────── */
+    .varieties { padding: 7rem 4rem; max-width: 1400px; margin: 0 auto; }
+    .varieties-hdr { text-align: center; max-width: 600px; margin: 0 auto 4rem; }
+    .varieties-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .var-card {
+      border-radius: var(--r); overflow: hidden; background: #fff;
+      border: 1px solid var(--border);
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+      cursor: default;
+    }
+    .var-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(46,31,14,.12); }
+    .var-top { padding: 2.25rem 2rem 1.5rem; }
+    .var-name { font-family: var(--serif); font-size: 1.7rem; font-style: italic; margin-bottom: .35rem; }
+    .var-type { font-size: .7rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+    .var-desc { font-size: .9rem; line-height: 1.7; color: var(--muted); margin-top: 1rem; font-weight: 300; }
+    .var-profile { padding: 1.25rem 2rem 2rem; border-top: 1px solid var(--border); background: var(--cream); }
+    .var-profile-label { font-size: .62rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: .75rem; }
+    .var-bars { display: flex; flex-direction: column; gap: .45rem; }
+    .var-bar-row { display: flex; align-items: center; gap: .75rem; }
+    .var-bar-label { font-size: .75rem; color: var(--muted); width: 70px; flex-shrink: 0; font-weight: 400; }
+    .var-bar-track { flex: 1; height: 5px; background: var(--border); border-radius: var(--pill); overflow: hidden; }
+    .var-bar-fill { height: 100%; border-radius: var(--pill); background: var(--gold); transition: width 1s ease; }
+    .var-card:nth-child(2) .var-bar-fill { background: var(--green); }
+    .var-card:nth-child(3) .var-bar-fill { background: #8a6a3c; }
+    .var-use { display: inline-flex; align-items: center; gap: .4rem; margin-top: 1rem; font-size: .75rem; font-weight: 500; color: var(--green); }
+    .var-use::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+    @media (max-width: 900px) { .varieties-grid { grid-template-columns: 1fr; } .varieties { padding: 5rem 1.5rem; } }
+    @media (min-width: 600px) and (max-width: 900px) { .varieties-grid { grid-template-columns: 1fr 1fr; } }
+
+    /* ── ABOUT / STORY ───────────────────────────────── */
+    .about { background: var(--cream2); padding: 7rem 4rem; }
+    .about-inner { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    .about-photo { border-radius: var(--r); overflow: hidden; aspect-ratio: 4/5; position: relative; }
+    .about-photo .ph { position: absolute; inset: 0; background: linear-gradient(155deg, #3d3020 0%, #2e1f0e 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
+    .about-photo .ph svg { width: 52px; height: 52px; opacity: .22; }
+    .about-photo .ph-tag { font-size: .68rem; letter-spacing: .12em; color: rgba(250,245,232,.3); text-transform: uppercase; }
+    .about-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .about-stat { display: flex; align-items: baseline; gap: .6rem; margin-bottom: 2rem; }
+    .stat-num { font-family: var(--serif); font-size: clamp(3rem, 5vw, 5rem); color: var(--gold); line-height: 1; }
+    .stat-txt { font-size: .9rem; color: var(--muted); max-width: 24ch; line-height: 1.5; font-weight: 300; }
+
+    @media (max-width: 860px) { .about-inner { grid-template-columns: 1fr; } .about { padding: 5rem 1.5rem; } }
+
+    /* ── S-MARKET DELIVERY BAND ──────────────────────── */
+    .delivery { background: var(--soil); color: #fff; padding: 5rem 4rem; }
+    .delivery-inner { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+    .delivery .sec-label { color: rgba(200,160,32,.6); }
+    .delivery .sec-heading { color: var(--cream); }
+    .delivery .sec-body { color: rgba(250,245,232,.6); }
+    .markets-list { margin-top: 2rem; display: flex; flex-direction: column; gap: .75rem; }
+    .market-item { display: flex; align-items: center; gap: 1rem; padding: .95rem 1.25rem; border-radius: var(--r); background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); transition: background .2s; }
+    .market-item:hover { background: rgba(200,160,32,.1); }
+    .market-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+    .market-name { font-size: .9rem; font-weight: 500; }
+    .market-loc { font-size: .78rem; color: rgba(255,255,255,.4); margin-left: auto; }
+    .delivery-badge { display: inline-flex; align-items: center; gap: .6rem; background: var(--gold); color: var(--soil); font-weight: 700; font-size: .8rem; letter-spacing: .06em; padding: .55rem 1.25rem; border-radius: var(--pill); margin-top: 1.75rem; }
+
+    @media (max-width: 860px) { .delivery-inner { grid-template-columns: 1fr; } .delivery { padding: 5rem 1.5rem; } }
+
+    /* ── SUSTAINABILITY ───────────────────────────────── */
+    .sustain { padding: 7rem 4rem; max-width: 1300px; margin: 0 auto; }
+    .sustain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 3.5rem; }
+    .sustain-card { padding: 2rem 1.75rem; border-radius: var(--r); background: var(--cream2); border: 1px solid var(--border); }
+    .sustain-ico { width: 42px; height: 42px; border-radius: var(--r); background: rgba(72,94,48,.1); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
+    .sustain-ico svg { width: 20px; height: 20px; stroke: var(--green); }
+    .sustain-title { font-family: var(--serif); font-size: 1.2rem; margin-bottom: .5rem; }
+    .sustain-txt { font-size: .9rem; color: var(--muted); line-height: 1.65; font-weight: 300; }
+
+    @media (max-width: 860px) { .sustain-grid { grid-template-columns: 1fr; } .sustain { padding: 5rem 1.5rem; } }
+    @media (min-width: 560px) and (max-width: 860px) { .sustain-grid { grid-template-columns: 1fr 1fr; } }
+
+    /* ── GALLERY ─────────────────────────────────────── */
+    .gallery { padding: 0 4rem 7rem; max-width: 1400px; margin: 0 auto; }
+    .gallery-hdr { margin-bottom: 2rem; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 260px 260px; gap: 1rem; }
+    .gc { border-radius: var(--r); overflow: hidden; position: relative; }
+    .gc.tall { grid-row: span 2; }
+    .gc .ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .8rem; }
+    .gc:nth-child(1) .ph { background: linear-gradient(155deg, #3d3020, #1a1008); }
+    .gc:nth-child(2) .ph { background: linear-gradient(155deg, #4a5e28, #2a3a14); }
+    .gc:nth-child(3) .ph { background: linear-gradient(155deg, #5a4a28, #2e2410); }
+    .gc:nth-child(4) .ph { background: linear-gradient(155deg, #3a3e20, #202210); }
+    .gc .ph svg { width: 36px; height: 36px; opacity: .25; }
+    .gc .ph-tag { font-size: .62rem; letter-spacing: .1em; color: rgba(250,245,232,.35); text-transform: uppercase; text-align: center; }
+    .gc img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+    @media (max-width: 860px) { .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; } .gc.tall { grid-row: span 1; height: 200px; } .gc { height: 200px; } .gallery { padding: 0 1.5rem 5rem; } }
+
+    /* ── CONTACT ─────────────────────────────────────── */
+    .contact { background: var(--cream2); padding: 7rem 4rem; }
+    .contact-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; }
+    .contact-info { }
+    .info-row { display: flex; align-items: flex-start; gap: .9rem; padding: .9rem 0; border-bottom: 1px solid var(--border); }
+    .info-row:first-child { border-top: 1px solid var(--border); }
+    .info-ico { width: 36px; height: 36px; background: #fff; border-radius: var(--r); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .info-ico svg { width: 16px; height: 16px; stroke: var(--green); }
+    .info-lbl { font-size: .67rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: .15rem; }
+    .info-val { font-size: .92rem; }
+    .info-val a { color: var(--green); font-weight: 500; }
+    .fb-cta { display: inline-flex; align-items: center; gap: .65rem; background: var(--gold); color: var(--soil); font-weight: 600; font-size: .85rem; letter-spacing: .03em; padding: .85rem 1.75rem; border-radius: var(--pill); margin-top: 2rem; transition: background .2s, transform .2s; }
+    .fb-cta:hover { background: var(--gold-lt); transform: translateY(-2px); }
+    .contact-form { }
+    .form-field { display: flex; flex-direction: column; gap: .35rem; margin-bottom: .9rem; }
+    .form-field label { font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .form-field input, .form-field textarea { background: #fff; border: 1px solid var(--border); border-radius: calc(var(--r)/2); padding: .72rem .95rem; font-family: var(--sans); font-size: .93rem; color: var(--soil); transition: border-color .2s; resize: vertical; font-weight: 300; }
+    .form-field input:focus, .form-field textarea:focus { outline: none; border-color: var(--green); }
+    .form-submit { background: var(--green); color: #fff; border: none; border-radius: var(--pill); padding: .85rem 2rem; font-family: var(--sans); font-size: .88rem; font-weight: 600; letter-spacing: .04em; cursor: pointer; transition: background .2s, transform .2s; }
+    .form-submit:hover { background: #364820; transform: translateY(-2px); }
+
+    @media (max-width: 860px) { .contact-inner { grid-template-columns: 1fr; } .contact { padding: 5rem 1.5rem; } }
+
+    /* ── FOOTER ──────────────────────────────────────── */
+    footer { background: var(--soil); color: rgba(250,245,232,.4); padding: 2rem 4rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: .78rem; }
+    .foot-brand { font-family: var(--serif); font-size: .95rem; color: rgba(250,245,232,.65); margin-bottom: .2rem; }
+    .foot-fb a { color: rgba(250,245,232,.4); transition: color .2s; }
+    .foot-fb a:hover { color: var(--gold); }
+    .foot-demo { font-size: .67rem; opacity: .35; }
+    @media (max-width: 600px) { footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ───────────────────────────────────────────── -->
+<nav class="nav-bar" id="navBar" aria-label="Päänavigaatio">
+  <a href="#" class="nav-logo" aria-label="Maatila Mankka – etusivu">
+    <img src="images/logo.jpg" alt="Maatila Mankka">
+    <span class="nav-wordmark">Maatila<br>Mankka</span>
+  </a>
+  <ul class="nav-links" role="list">
+    <li><a href="#lajikkeet"><span class="lang-fi">Lajikkeet</span><span class="lang-sv">Sorter</span><span class="lang-en">Varieties</span></a></li>
+    <li><a href="#tarina"><span class="lang-fi">Tarina</span><span class="lang-sv">Historia</span><span class="lang-en">Story</span></a></li>
+    <li><a href="#toimitus"><span class="lang-fi">Myyntipisteet</span><span class="lang-sv">Försäljning</span><span class="lang-en">Where to buy</span></a></li>
+    <li><a href="#yhteystiedot"><span class="lang-fi">Yhteystiedot</span><span class="lang-sv">Kontakt</span><span class="lang-en">Contact</span></a></li>
+  </ul>
+  <div class="nav-lang" role="group" aria-label="Kielivalinta">
+    <button class="lang-btn active" data-lang="fi" aria-pressed="true">FI</button>
+    <button class="lang-btn" data-lang="sv" aria-pressed="false">SV</button>
+    <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+  </div>
+  <button class="nav-hamburger" id="menuBtn" aria-label="Avaa valikko" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile overlay -->
+<div class="mob-menu" id="mobMenu" role="dialog" aria-modal="true">
+  <button class="mob-close" id="mobClose" aria-label="Sulje valikko">&times;</button>
+  <ul class="mob-links" role="list">
+    <li><a href="#lajikkeet" class="mob-link"><span class="lang-fi">Lajikkeet</span><span class="lang-sv">Sorter</span><span class="lang-en">Varieties</span></a></li>
+    <li><a href="#tarina" class="mob-link"><span class="lang-fi">Tarina</span><span class="lang-sv">Historia</span><span class="lang-en">Story</span></a></li>
+    <li><a href="#toimitus" class="mob-link"><span class="lang-fi">Myyntipisteet</span><span class="lang-sv">Försäljning</span><span class="lang-en">Where to buy</span></a></li>
+    <li><a href="#yhteystiedot" class="mob-link"><span class="lang-fi">Yhteystiedot</span><span class="lang-sv">Kontakt</span><span class="lang-en">Contact</span></a></li>
+  </ul>
+  <div class="mob-lang">
+    <button class="lang-btn active" data-lang="fi" aria-pressed="true">FI</button>
+    <button class="lang-btn" data-lang="sv" aria-pressed="false">SV</button>
+    <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+  </div>
+</div>
+
+<!-- ── HERO — asymmetric offset ──────────────────────── -->
+<section class="hero" aria-label="Etusivu">
+  <div class="hero-circle" aria-hidden="true"></div>
+  <div class="hero-circle2" aria-hidden="true"></div>
+  <div class="hero-left reveal">
+    <p class="hero-eyebrow">
+      <span class="lang-fi">Eurajoki, Satakunta</span>
+      <span class="lang-sv">Eurajoki, Satakunta</span>
+      <span class="lang-en">Eurajoki, Satakunta</span>
+    </p>
+    <h1 class="hero-heading">
+      <span class="lang-fi">Paikallinen<br><em>peruna.</em><br>Oikea maku.</span>
+      <span class="lang-sv">Lokal<br><em>potatis.</em><br>Äkta smak.</span>
+      <span class="lang-en">Local<br><em>potato.</em><br>Real flavour.</span>
+    </h1>
+    <p class="hero-sub">
+      <span class="lang-fi">Maatila Mankka kasvattaa laadukkaita perunalajikkeita Eurajoen kunnassa. Annabelle, Helmi ja Vindika — jokainen omalla persoonallaan, kaikki läheltä.</span>
+      <span class="lang-sv">Maatila Mankka odlar högkvalitativa potatisorter i Eurajoki. Annabelle, Helmi och Vindika — var och en med sin personlighet, alla från närbelägna fält.</span>
+      <span class="lang-en">Maatila Mankka grows quality potato varieties in Eurajoki. Annabelle, Helmi and Vindika — each with its own character, all from nearby fields.</span>
+    </p>
+    <a href="#lajikkeet" class="hero-cta">
+      <span class="lang-fi">Tutki lajikkeet</span>
+      <span class="lang-sv">Utforska sorterna</span>
+      <span class="lang-en">Explore varieties</span>
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M8 3l5 5-5 5M3 8h10"/></svg>
+    </a>
+    <p class="hero-location">
+      <span class="lang-fi">Myydään S-marketeissa Eurajoella, Äyhöllä ja Kehätiellä</span>
+      <span class="lang-sv">Säljs på S-marketer i Eurajoki, Äyhö och Kehätie</span>
+      <span class="lang-en">Sold at S-markets in Eurajoki, Äyhö and Kehätie</span>
+    </p>
+  </div>
+  <div class="hero-right" aria-hidden="true">
+    <div class="ph">
+      <svg viewBox="0 0 64 64" fill="none" stroke="rgba(250,245,232,.2)" stroke-width="1.5"><ellipse cx="32" cy="38" rx="18" ry="12"/><path d="M20 38c0-6 5-14 12-20 7 6 12 14 12 20"/><circle cx="32" cy="24" r="4"/></svg>
+      <span class="ph-tag"><span class="lang-fi">Perunapelto</span><span class="lang-sv">Potatisåker</span><span class="lang-en">Potato field</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ── POTATO VARIETIES — SIGNATURE COMPONENT ────────── -->
+<section class="varieties" id="lajikkeet" aria-labelledby="h-lajikkeet">
+  <div class="varieties-hdr reveal">
+    <span class="sec-label"><span class="lang-fi">Lajikkeet</span><span class="lang-sv">Sorter</span><span class="lang-en">Varieties</span></span>
+    <h2 class="sec-heading" id="h-lajikkeet">
+      <span class="lang-fi">Kolme lajiketta, yksi tila</span>
+      <span class="lang-sv">Tre sorter, en gård</span>
+      <span class="lang-en">Three varieties, one farm</span>
+    </h2>
+    <p class="sec-body">
+      <span class="lang-fi">Jokaisella lajikkeella on oma luonteensa ja parhaiten sopiva käyttötarkoituksensa. Kaikki kasvatettu Mankalla samalla huolella.</span>
+      <span class="lang-sv">Varje sort har sin egen karaktär och sitt bästa användningsområde. Alla odlade med samma omsorg på Mankka.</span>
+      <span class="lang-en">Each variety has its own character and the use it suits best. All grown with the same care at Mankka.</span>
+    </p>
+  </div>
+  <div class="varieties-grid">
+
+    <!-- Annabelle -->
+    <div class="var-card reveal">
+      <div class="var-top">
+        <div class="var-type"><span class="lang-fi">Varhaisperuna</span><span class="lang-sv">Tidig potatis</span><span class="lang-en">Early variety</span></div>
+        <div class="var-name">Annabelle</div>
+        <p class="var-desc">
+          <span class="lang-fi">Pitkä, kellertävä ja silkkisen kiinteä — Annabelle on varhainen suosikki, joka sopii erinomaisesti keittämiseen ja salaatteihin. Ohut kuori, pähkinäinen maku.</span>
+          <span class="lang-sv">Lång, gulaktig och silkigt fast — Annabelle är en tidig favorit, utmärkt för kokning och sallader. Tunn skal, nötig smak.</span>
+          <span class="lang-en">Long, yellowish and silky firm — Annabelle is an early favourite, excellent for boiling and salads. Thin skin, nutty flavour.</span>
+        </p>
+      </div>
+      <div class="var-profile">
+        <div class="var-profile-label"><span class="lang-fi">Ominaisuudet</span><span class="lang-sv">Egenskaper</span><span class="lang-en">Profile</span></div>
+        <div class="var-bars">
+          <div class="var-bar-row">
+            <span class="var-bar-label"><span class="lang-fi">Kiinteys</span><span class="lang-sv">Fasthet</span><span class="lang-en">Firmness</span></span>
+            <div class="var-bar-track"><div class="var-bar-fill" style="width:88%"></div></div>
+          </div>
+          <div class="var-bar-row">
+            <span class="var-bar-label"><span class="lang-fi">Maku</span><span class="lang-sv">Smak</span><span class="lang-en">Flavour</span></span>
+            <div class="var-bar-track"><div class="var-bar-fill" style="width:80%"></div></div>
+          </div>
+          <div class="var-bar-row">
+            <span class="var-bar-label"><span class="lang-fi">Monitoit.</span><span class="lang-sv">Versatil.</span><span class="lang-en">Versatile</span></span>
+            <div class="var-bar-track"><div class="var-bar-fill" style="width:70%"></div></div>
+          </div>
+        </div>
+        <div class="var-use"><span class="lang-fi">Parhaiten: keitto ja salaatit</span><span class="lang-sv">Bäst: kokning och sallader</span><span class="lang-en">Best: boiling and salads</span></div>
+      </div>
+    </div>
+
+    <!-- Helmi -->
+    <div class="var-card reveal">
+      <div class="var-top">
+        <div class="var-type"><span class="lang-fi">Yleislajike</span><span class="lang-sv">Allroundssort</span><span class="lang-en">All-round variety</span></div>
+        <div class="var-name">Helmi</div>
+        <p class="var-desc">
+          <span class="lang-fi">Pyöreä, puhtaan valkoinen ja mieto maultaan — Helmi on arjen luotettava, joka toimii niin soseessa kuin uuniperunana. Ohut kuori, helppo kuoria.</span>
+          <span class="lang-sv">Rund, rent vit och mild i smaken — Helmi är vardagens pålitliga sort som fungerar både i mos och som ugnspotatis. Tunn skal, lätt att skala.</span>
+          <span class="lang-en">Round, clean white and mild in flavour — Helmi is the everyday reliable, working equally well mashed or baked. Thin skin, easy to peel.</span>
+        </p>
+      </div>
+      <div class="var-profile">
+        <div class="var-profile-label"><span class="lang-fi">Ominaisuudet</span><span class="lang-sv">Egenskaper</span><span class="lang-en">Profile</span></div>
+        <div class="var-bars">
+          <div class="var-bar-row">
+            <span class="var-bar-label"><span class="lang-fi">Kiinteys</span><span class="lang-sv">Fasthet</span><span class="lang-en">Firmness</span></span>
+            <div class="var-bar-track"><div class="var-bar-fill" style="width:55%"></div></div>
+          </div>
+          <div class="var-bar-row">
+            <span class="var-bar-label"><span class="lang-fi">Maku</span><span class="lang-sv">Smak</span><span class="lang-en">Flavour</span></span>
+            <div class="var-bar-track"><div class="var-bar-fill" style="width:72%"></div></div>
+          </div>
+          <div class="var-bar-row">
+            <span class="var-bar-label"><span class="lang-fi">Monitoit.</span><span class="lang-sv">Versatil.</span><span class="lang-en">Versatile</span></span>
+            <div class="var-bar-track"><div class="var-bar-fill" style="width:92%"></div></div>
+          </div>
+        </div>
+        <div class="var-use" style="color:var(--green)"><span class="lang-fi">Parhaiten: sose ja uuniperuna</span><span class="lang-sv">Bäst: mos och ugnspotatis</span><span class="lang-en">Best: mash and baked potato</span></div>
+      </div>
+    </div>
+
+    <!-- Vindika -->
+    <div class="var-card reveal">
+      <div class="var-top">
+        <div class="var-type" style="color:#8a6a3c;"><span class="lang-fi">Säilyvä lajike</span><span class="lang-sv">Lagringssort</span><span class="lang-en">Storage variety</span></div>
+        <div class="var-name">Vindika</div>
+        <p class="var-desc">
+          <span class="lang-fi">Tiivis ja maanläheinen — Vindika säilyy pitkään ja pitää muotonsa kypsentäessä. Erinomainen paahtamiseen, keitoissa ja friteeraukseen.</span>
+          <span class="lang-sv">Kompakt och jordnära — Vindika håller länge och behåller sin form under tillagning. Utmärkt för rostning, soppor och fritering.</span>
+          <span class="lang-en">Dense and earthy — Vindika keeps well and holds its shape when cooked. Excellent for roasting, soups and frying.</span>
+        </p>
+      </div>
+      <div class="var-profile">
+        <div class="var-profile-label"><span class="lang-fi">Ominaisuudet</span><span class="lang-sv">Egenskaper</span><span class="lang-en">Profile</span></div>
+        <div class="var-bars">
+          <div class="var-bar-row">
+            <span class="var-bar-label"><span class="lang-fi">Kiinteys</span><span class="lang-sv">Fasthet</span><span class="lang-en">Firmness</span></span>
+            <div class="var-bar-track"><div class="var-bar-fill" style="width:95%"></div></div>
+          </div>
+          <div class="var-bar-row">
+            <span class="var-bar-label"><span class="lang-fi">Maku</span><span class="lang-sv">Smak</span><span class="lang-en">Flavour</span></span>
+            <div class="var-bar-track"><div class="var-bar-fill" style="width:78%"></div></div>
+          </div>
+          <div class="var-bar-row">
+            <span class="var-bar-label"><span class="lang-fi">Monitoit.</span><span class="lang-sv">Versatil.</span><span class="lang-en">Versatile</span></span>
+            <div class="var-bar-track"><div class="var-bar-fill" style="width:65%"></div></div>
+          </div>
+        </div>
+        <div class="var-use" style="color:#8a6a3c;"><span class="lang-fi">Parhaiten: paahto, keitto, friteeri</span><span class="lang-sv">Bäst: rostning, soppa, fritering</span><span class="lang-en">Best: roasting, soup, frying</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── ABOUT / STORY ──────────────────────────────────── -->
+<section class="about" id="tarina" aria-labelledby="h-tarina">
+  <div class="about-inner">
+    <div class="about-photo reveal" aria-hidden="true">
+      <div class="ph">
+        <svg viewBox="0 0 64 64" fill="none" stroke="rgba(250,245,232,.2)" stroke-width="1.5"><rect x="8" y="16" width="48" height="34" rx="2"/><circle cx="32" cy="29" r="8"/><path d="M8 40l12-10 10 8 8-6 18 14"/></svg>
+        <span class="ph-tag"><span class="lang-fi">Perunapelto, Eurajoki</span><span class="lang-sv">Potatisåker, Eurajoki</span><span class="lang-en">Potato field, Eurajoki</span></span>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="about-stat">
+        <span class="stat-num">2 000</span>
+        <span class="stat-txt">
+          <span class="lang-fi">toimitusta S-marketiin Eurajoella — ja kasvussa</span>
+          <span class="lang-sv">leveranser till S-market i Eurajoki — och det växer</span>
+          <span class="lang-en">deliveries to the S-market in Eurajoki — and growing</span>
+        </span>
+      </div>
+      <span class="sec-label"><span class="lang-fi">Tilan tarina</span><span class="lang-sv">Gårdens historia</span><span class="lang-en">Our story</span></span>
+      <h2 class="sec-heading" id="h-tarina">
+        <span class="lang-fi">Paikallinen ruoka, oikea hinta</span>
+        <span class="lang-sv">Lokal mat, rätt pris</span>
+        <span class="lang-en">Local food, fair price</span>
+      </h2>
+      <div class="sec-body">
+        <p>
+          <span class="lang-fi">Maatila Mankka tuottaa perunaa Eurajoen kunnassa, Satakunnassa. Tilan toiminta perustuu yksinkertaiselle ajatukselle: laadukasta, paikallista ruokaa kohtuulliseen hintaan, pienellä hiilijalanjäljellä.</span>
+          <span class="lang-sv">Maatila Mankka producerar potatis i Eurajoki, Satakunta. Gårdens verksamhet bygger på en enkel idé: kvalitetsmat från trakten till ett rimligt pris, med litet koldioxidavtryck.</span>
+          <span class="lang-en">Maatila Mankka grows potatoes in Eurajoki, Satakunta. The farm's work is built on a simple idea: quality local food at a fair price, with a small carbon footprint.</span>
+        </p>
+        <p>
+          <span class="lang-fi">Perunat toimitetaan suoraan lähialueen S-marketteihin. Lyhyt matka pellolta hyllyyn tarkoittaa tuorempaa tuotetta ja pienempää kuljetustaakkaa. Kotimainen peruna on edullinen, ravitseva ja monipuolinen raaka-aine — ja se kannattaa ostaa läheltä.</span>
+          <span class="lang-sv">Potatisen levereras direkt till S-marketerna i närområdet. En kort väg från åker till hylla innebär en färskare produkt och en lägre transportbörda. Inhemsk potatis är ett prisvärt, näringsrikt och mångsidigt råvaruval — och det lönar sig att köpa det lokalt.</span>
+          <span class="lang-en">The potatoes are delivered directly to nearby S-markets. A short journey from field to shelf means a fresher product and a lower transport footprint. Finnish potato is an affordable, nutritious and versatile ingredient — and it's worth buying it local.</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── LOCAL DELIVERY BAND ────────────────────────────── -->
+<section class="delivery" id="toimitus" aria-labelledby="h-toimitus">
+  <div class="delivery-inner">
+    <div class="reveal">
+      <span class="sec-label"><span class="lang-fi">Myyntipisteet</span><span class="lang-sv">Försäljningsställen</span><span class="lang-en">Where to buy</span></span>
+      <h2 class="sec-heading" id="h-toimitus">
+        <span class="lang-fi">Löydät meidän perunan lähikaupastasi</span>
+        <span class="lang-sv">Du hittar vår potatis i din närmaste butik</span>
+        <span class="lang-en">Find our potatoes in your local store</span>
+      </h2>
+      <div class="sec-body">
+        <p>
+          <span class="lang-fi">Maatila Mankan perunat toimitetaan suoraan tilalta kolmeen S-markettiin Eurajoen alueella. Tarkemmat tuotesaatavuudet kannattaa tarkistaa kaupan omasta valikoimasta.</span>
+          <span class="lang-sv">Maatila Mankas potatisar levereras direkt från gården till tre S-marketer i Eurajokiregionen. Kontrollera den exakta tillgängligheten i butikens sortiment.</span>
+          <span class="lang-en">Maatila Mankka's potatoes are delivered directly from the farm to three S-markets in the Eurajoki area. Check the store's current stock for exact product availability.</span>
+        </p>
+      </div>
+      <div class="delivery-badge">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 8h12M10 4l4 4-4 4"/></svg>
+        <span class="lang-fi">Suoraan pellolta kauppaan</span><span class="lang-sv">Direkt från åker till butik</span><span class="lang-en">Straight from field to shelf</span>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="markets-list" role="list">
+        <div class="market-item" role="listitem">
+          <div class="market-dot"></div>
+          <span class="market-name">S-market Eurajoki</span>
+          <span class="market-loc">Eurajoki</span>
+        </div>
+        <div class="market-item" role="listitem">
+          <div class="market-dot"></div>
+          <span class="market-name">S-market Äyhö</span>
+          <span class="market-loc">Äyhö</span>
+        </div>
+        <div class="market-item" role="listitem">
+          <div class="market-dot"></div>
+          <span class="market-name">S-market Kehätie</span>
+          <span class="market-loc">Kehätie</span>
+        </div>
+      </div>
+      <p style="font-size:.8rem;color:rgba(250,245,232,.38);margin-top:1.5rem;line-height:1.6;">
+        <span class="lang-fi">Saatavuus vaihtelee sesongin ja sadon mukaan. Lisätietoa suoraan tilalta Facebookin kautta.</span>
+        <span class="lang-sv">Tillgängligheten varierar beroende på säsong och skörd. Mer information direkt från gården via Facebook.</span>
+        <span class="lang-en">Availability varies by season and harvest. For more info contact the farm directly via Facebook.</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SUSTAINABILITY ─────────────────────────────────── -->
+<section class="sustain" aria-labelledby="h-kestava">
+  <div class="reveal">
+    <span class="sec-label"><span class="lang-fi">Arvot</span><span class="lang-sv">Värderingar</span><span class="lang-en">Values</span></span>
+    <h2 class="sec-heading" id="h-kestava">
+      <span class="lang-fi">Lähellä tuotettu on parempaa</span>
+      <span class="lang-sv">Lokalproducerat är bättre</span>
+      <span class="lang-en">Locally grown is better</span>
+    </h2>
+  </div>
+  <div class="sustain-grid">
+    <div class="sustain-card reveal">
+      <div class="sustain-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12c0-3.5 1.8-6.57 4.5-8.33"/><path d="M12 2v10l5 3"/></svg>
+      </div>
+      <h3 class="sustain-title"><span class="lang-fi">Lyhyt kuljetusmatka</span><span class="lang-sv">Kort transportväg</span><span class="lang-en">Short transport distance</span></h3>
+      <p class="sustain-txt">
+        <span class="lang-fi">Pellolta suoraan lähikauppaan — turha kuljetus jää pois, tuote on tuoreempaa ja hiilijalanjälki pienempi kuin kauempaa tuoduilla perunoilla.</span>
+        <span class="lang-sv">Från åker direkt till närmaste butik — onödig transport uteblir, produkten är färskare och koldioxidavtrycket är lägre än potatis transporterad från längre avstånd.</span>
+        <span class="lang-en">From field directly to the local store — unnecessary transport is removed, the product is fresher, and the carbon footprint is smaller than potatoes shipped from further away.</span>
+      </p>
+    </div>
+    <div class="sustain-card reveal">
+      <div class="sustain-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3 class="sustain-title"><span class="lang-fi">Kotimainen laadukas raaka-aine</span><span class="lang-sv">Inhemskt råmaterial av hög kvalitet</span><span class="lang-en">High-quality domestic ingredient</span></h3>
+      <p class="sustain-txt">
+        <span class="lang-fi">Suomalainen peruna on ravitseva, edullinen ja monipuolinen. Mankalla kasvatetut lajikkeet ovat hyvä kotimaisen ruoantuotannon edustaja.</span>
+        <span class="lang-sv">Finsk potatis är näringsrik, prisvärd och mångsidig. Sorterna odlade på Mankka representerar väl det inhemska livsmedelsproduktionen.</span>
+        <span class="lang-en">Finnish potato is nutritious, affordable and versatile. The varieties grown at Mankka are a fine example of domestic food production.</span>
+      </p>
+    </div>
+    <div class="sustain-card reveal">
+      <div class="sustain-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      </div>
+      <h3 class="sustain-title"><span class="lang-fi">Avoin toiminta</span><span class="lang-sv">Öppen verksamhet</span><span class="lang-en">Transparent operations</span></h3>
+      <p class="sustain-txt">
+        <span class="lang-fi">Tilan toimintaa voi seurata suoraan Facebookissa. Tiedämme mistä ruoka tulee — ja sen pitäisi olla normi, ei poikkeus.</span>
+        <span class="lang-sv">Gårdens verksamhet kan följas direkt på Facebook. Vi vet varifrån maten kommer — och det borde vara normen, inte undantaget.</span>
+        <span class="lang-en">The farm's work can be followed directly on Facebook. We know where our food comes from — and that should be the norm, not the exception.</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── GALLERY ────────────────────────────────────────── -->
+<section class="gallery" aria-labelledby="h-gallery">
+  <div class="gallery-hdr reveal">
+    <span class="sec-label"><span class="lang-fi">Tilakuvasto</span><span class="lang-sv">Gårdsbilder</span><span class="lang-en">Farm gallery</span></span>
+    <h2 class="sec-heading" id="h-gallery">
+      <span class="lang-fi">Kasvukausi pellolla</span>
+      <span class="lang-sv">Odlingssäsongen på åkern</span>
+      <span class="lang-en">The growing season on the field</span>
+    </h2>
+  </div>
+  <div class="gallery-grid reveal" role="list">
+    <div class="gc tall" role="listitem">
+      <div class="ph">
+        <svg viewBox="0 0 64 64" fill="none" stroke="rgba(250,245,232,.22)" stroke-width="1.5"><path d="M12 52L24 28l8 14 6-8 14 18H12z"/><circle cx="46" cy="18" r="8"/></svg>
+        <span class="ph-tag"><span class="lang-fi">Perunapelto</span><span class="lang-sv">Potatisåker</span><span class="lang-en">Potato field</span></span>
+      </div>
+    </div>
+    <div class="gc" role="listitem">
+      <div class="ph">
+        <svg viewBox="0 0 64 64" fill="none" stroke="rgba(250,245,232,.22)" stroke-width="1.5"><ellipse cx="32" cy="40" rx="16" ry="10"/><path d="M22 40c0-5 4-12 10-16 6 4 10 11 10 16"/></svg>
+        <span class="ph-tag"><span class="lang-fi">Tuoreita perunoita</span><span class="lang-sv">Färsk potatis</span><span class="lang-en">Fresh potatoes</span></span>
+      </div>
+    </div>
+    <div class="gc" role="listitem">
+      <div class="ph">
+        <svg viewBox="0 0 64 64" fill="none" stroke="rgba(250,245,232,.22)" stroke-width="1.5"><rect x="12" y="20" width="40" height="28" rx="3"/><path d="M20 20V16a4 4 0 0 1 8 0v4M36 20V16a4 4 0 0 1 8 0v4"/></svg>
+        <span class="ph-tag"><span class="lang-fi">Sadonkorjuu</span><span class="lang-sv">Skörd</span><span class="lang-en">Harvest</span></span>
+      </div>
+    </div>
+    <div class="gc" role="listitem">
+      <div class="ph">
+        <svg viewBox="0 0 64 64" fill="none" stroke="rgba(250,245,232,.22)" stroke-width="1.5"><path d="M8 52V22l24-14 24 14v30"/><rect x="22" y="36" width="20" height="16"/></svg>
+        <span class="ph-tag"><span class="lang-fi">Tilan pihapiiri</span><span class="lang-sv">Gårdsplanen</span><span class="lang-en">Farm yard</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACT ────────────────────────────────────────── -->
+<section class="contact" id="yhteystiedot" aria-labelledby="h-contact">
+  <div class="contact-inner">
+    <div class="reveal">
+      <span class="sec-label"><span class="lang-fi">Yhteystiedot</span><span class="lang-sv">Kontaktuppgifter</span><span class="lang-en">Contact</span></span>
+      <h2 class="sec-heading" id="h-contact">
+        <span class="lang-fi">Otetaan yhteyttä</span>
+        <span class="lang-sv">Ta kontakt</span>
+        <span class="lang-en">Get in touch</span>
+      </h2>
+      <div class="contact-info">
+        <div class="info-row">
+          <div class="info-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true"><path d="M21 10c0 6-9 13-9 13S3 16 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div><p class="info-lbl"><span class="lang-fi">Sijainti</span><span class="lang-sv">Plats</span><span class="lang-en">Location</span></p><p class="info-val">Eurajoki, Satakunta</p></div>
+        </div>
+        <div class="info-row">
+          <div class="info-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
+          <div><p class="info-lbl">Facebook</p><p class="info-val"><a href="https://www.facebook.com/MaatilaMankka/" target="_blank" rel="noopener">MaatilaMankka</a></p></div>
+        </div>
+        <div class="info-row">
+          <div class="info-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></div>
+          <div><p class="info-lbl">Instagram</p><p class="info-val"><a href="https://www.instagram.com/mr_mankka/" target="_blank" rel="noopener">@mr_mankka</a></p></div>
+        </div>
+      </div>
+      <a href="https://www.facebook.com/MaatilaMankka/" class="fb-cta" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        <span class="lang-fi">Ota yhteyttä Facebookin kautta</span>
+        <span class="lang-sv">Kontakta oss via Facebook</span>
+        <span class="lang-en">Contact us via Facebook</span>
+      </a>
+    </div>
+    <div class="reveal">
+      <form class="contact-form" onsubmit="handleForm(event)">
+        <div class="form-field">
+          <label for="fn"><span class="lang-fi">Nimi</span><span class="lang-sv">Namn</span><span class="lang-en">Name</span></label>
+          <input type="text" id="fn" name="name" required autocomplete="name">
+        </div>
+        <div class="form-field">
+          <label for="fe"><span class="lang-fi">Sähköposti</span><span class="lang-sv">E-post</span><span class="lang-en">Email</span></label>
+          <input type="email" id="fe" name="email" required autocomplete="email">
+        </div>
+        <div class="form-field">
+          <label for="fm"><span class="lang-fi">Viesti</span><span class="lang-sv">Meddelande</span><span class="lang-en">Message</span></label>
+          <textarea id="fm" name="message" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="form-submit"><span class="lang-fi">Lähetä viesti</span><span class="lang-sv">Skicka meddelande</span><span class="lang-en">Send message</span></button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────── -->
+<footer>
+  <div>
+    <div class="foot-brand">Maatila Mankka</div>
+    <div>Eurajoki, Satakunta</div>
+  </div>
+  <div class="foot-fb">
+    <a href="https://www.facebook.com/MaatilaMankka/" target="_blank" rel="noopener" aria-label="Facebook">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:inline;vertical-align:middle;margin-right:.35rem"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+      MaatilaMankka
+    </a>
+  </div>
+  <div class="foot-demo">
+    <span class="lang-fi">Demo, suunnitellut Anton Jalonen · Julkaisematon</span>
+    <span class="lang-sv">Demo, designad av Anton Jalonen · Opublicerad</span>
+    <span class="lang-en">Demo, designed by Anton Jalonen · Unpublished</span>
+  </div>
+</footer>
+
+<script>
+// ── SCROLL NAV ───────────────────────────────────────────
+const nav = document.getElementById('navBar');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+}, { passive: true });
+
+// ── MOBILE MENU ──────────────────────────────────────────
+const menuBtn = document.getElementById('menuBtn');
+const mobMenu = document.getElementById('mobMenu');
+const mobClose = document.getElementById('mobClose');
+
+function openMob() { mobMenu.classList.add('open'); menuBtn.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; }
+function closeMob() { mobMenu.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); document.body.style.overflow=''; }
+menuBtn.addEventListener('click', openMob);
+mobClose.addEventListener('click', closeMob);
+mobMenu.querySelectorAll('.mob-link').forEach(l => l.addEventListener('click', closeMob));
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeMob(); });
+
+// ── LANGUAGE ─────────────────────────────────────────────
+function setLang(l) {
+  document.body.className = l==='fi' ? '' : 'lang-'+l;
+  document.documentElement.lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    const a = b.dataset.lang === l;
+    b.classList.toggle('active', a);
+    b.setAttribute('aria-pressed', a);
+  });
+  localStorage.setItem('lang', l);
+}
+document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+const saved = localStorage.getItem('lang');
+if (saved && saved !== 'fi') setLang(saved);
+
+// ── REVEAL ───────────────────────────────────────────────
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+}, { threshold: 0.08, rootMargin: '0px 0px -32px 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// ── FORM ─────────────────────────────────────────────────
+function handleForm(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('.form-submit');
+  const l = document.documentElement.lang || 'fi';
+  btn.textContent = l==='sv' ? 'Tack!' : l==='en' ? 'Thank you!' : 'Kiitos!';
+  btn.disabled = true;
+  btn.style.background = '#c8a020';
+  btn.style.color = '#2e1f0e';
+}
+</script>
+</body>
+</html>
