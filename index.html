@@ -738,10 +738,10 @@ function setLang(l) {
     b.classList.toggle('active', a);
     b.setAttribute('aria-pressed', a);
   });
-  localStorage.setItem('lang', l);
+  localStorage.setItem('lang_'+location.pathname.split('/')[1], l);
 }
 document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
-const saved = localStorage.getItem('lang');
+const saved = localStorage.getItem('lang_'+location.pathname.split('/')[1]);
 if (saved && saved !== 'fi') setLang(saved);
 
 // ── REVEAL ───────────────────────────────────────────────
